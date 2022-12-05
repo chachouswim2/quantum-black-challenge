@@ -104,6 +104,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.venv_qb_challenge
 env/
 venv/
 ENV/
