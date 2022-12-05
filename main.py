@@ -6,11 +6,11 @@ import os
 import random
 
 import sys
-sys.path.append('model_building/create_image_folders.py')
-import subfolders 
-sys.path.append('model_building/keras_model.py')
-import make_model 
 import config
+sys.path.append('model_building/create_image_folders.py')
+from model_building.create_image_folders import * 
+sys.path.append('model_building/keras_model.py')
+from model_building.keras_model import *
 
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -51,7 +51,11 @@ labels_image = "data/ai_ready/x-ai_data.csv"
 subfolders(labels_image, img_folder, train_img, val_img)
 
 ## Model
-model = make_model(input_shape=image_size + (3,), num_classes=2)
+model = make_model(input_shape=config.image_size + (3,), num_classes=2)
+
+## Train and Val dataset
+train_ds = train_set(train_img, config.image_size, config.batch_size)
+val_ds = val_set(val_img, config.image_size, config.batch_size)
 
 ## Train Model
-train_model(model, )
+train_model(model, model, train_ds, val_ds, config.number_epochs)
