@@ -75,7 +75,7 @@ class QB_Dataset(Dataset):
         """
         super().__init__()
         self.data = data.values
-        self.labels = data.iloc[:, 1].values
+        self.labels = data['class'].values
         self.path = path
         self.transform = transform
 
@@ -92,7 +92,7 @@ class QB_Dataset(Dataset):
         """
 
         img_name = self.data[index][0]
-        labels = np.array(self.data[index][1:], dtype="float32")
+        label = self.labels[index]
         img_path = os.path.join(self.path, img_name)
         image = img.imread(img_path)
         if self.transform is not None:
