@@ -6,6 +6,7 @@ import warnings
 warnings.simplefilter("ignore", UserWarning)
 
 
+#Test functions
 def test_model(test_g, model, batch_size):
     """
     Create the function to test the model and create predictions
