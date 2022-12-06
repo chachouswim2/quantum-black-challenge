@@ -7,16 +7,18 @@ import random
 
 import sys
 import config
-sys.path.append('model_building/create_image_folders.py')
-from model_building.create_image_folders import * 
-sys.path.append('model_building/keras_model.py')
+
+sys.path.append("model_building/create_image_folders.py")
+from model_building.create_image_folders import *
+
+sys.path.append("model_building/keras_model.py")
 from model_building.cnn_model_keras import *
 
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 
-import keras 
+import keras
 from keras.initializers import RandomNormal
 from keras.layers import Dense, Flatten, Activation
 from keras.layers import Conv2D, MaxPooling2D
@@ -29,23 +31,35 @@ from keras.utils.np_utils import to_categorical
 from keras.models import Model
 from keras.models import Sequential
 from keras.callbacks import EarlyStopping
+from sklearn.metrics import roc_curve,auc, roc_auc_score
+import matplotlib.pyplot as plt
 
 from tensorflow.keras import layers
 import warnings
+
 warnings.simplefilter("ignore", UserWarning)
 
 ## Set paths
+<<<<<<< HEAD
 img_folder = os.path.join(os.getcwd(),"data","ai_ready","images")
 train_img = os.path.join(os.getcwd(),"data","ai_ready","train_images")
 val_img = os.path.join(os.getcwd(),"data","ai_ready","val_images")
 labels_image = os.path.join(os.getcwd(),"data","ai_ready","x-ai_data.csv")
 create_images =False
+=======
+img_folder = os.path.join("data", "ai_ready", "images")
+train_img = os.path.join("data", "ai_ready", "train_images")
+val_img = os.path.join("data", "ai_ready", "val_images")
+labels_image = os.path.join("data", "ai_ready", "x-ai_data.csv")
+create_images = False
+plot_auc = False
+>>>>>>> b2b9108f3bce8ba8145f754795273d81ddb8186f
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tf.config.list_physical_devices()
-    print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+    print("Num GPUs Available: ", len(tf.config.list_physical_devices("GPU")))
     physical_devices = tf.config.list_physical_devices("GPU")
-    if len(physical_devices)>0:
+    if len(physical_devices) > 0:
         tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
     ## Move images to subfolders
@@ -62,3 +76,19 @@ if __name__ == '__main__':
 
     ## Train Model
     train_model(model, train_ds, val_ds, config.number_epochs)
+
+    y_test = np.ones(len(train_ds))
+    probs = model.predict_proba(X_test)
+    preds = probs[:,1]
+    fpr, tpr, threshold = roc_curve(y_test, preds)
+    roc_auc = roc_auc_score(fpr, tpr)
+
+    plt.title('Receiver Operating Characteristic')
+    plt.plot(fpr, tpr, 'b', label = f'AUC = {roc_auc :0.2f}')
+    plt.legend(loc = 'lower right')
+    plt.plot([0, 1], [0, 1],'r--')
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.ylabel('True Positive Rate')
+    plt.xlabel('False Positive Rate')
+    plt.show()
