@@ -7,16 +7,18 @@ import random
 
 import sys
 import config
-sys.path.append('model_building/create_image_folders.py')
-from model_building.create_image_folders import * 
-sys.path.append('model_building/keras_model.py')
+
+sys.path.append("model_building/create_image_folders.py")
+from model_building.create_image_folders import *
+
+sys.path.append("model_building/keras_model.py")
 from model_building.cnn_model_keras import *
 
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 
-import keras 
+import keras
 from keras.initializers import RandomNormal
 from keras.layers import Dense, Flatten, Activation
 from keras.layers import Conv2D, MaxPooling2D
@@ -32,20 +34,21 @@ from keras.callbacks import EarlyStopping
 
 from tensorflow.keras import layers
 import warnings
+
 warnings.simplefilter("ignore", UserWarning)
 
 ## Set paths
-img_folder = os.path.join("data","ai_ready","images")
-train_img = os.path.join("data","ai_ready","train_images")
-val_img = os.path.join("data","ai_ready","val_images")
-labels_image = os.path.join("data","ai_ready","x-ai_data.csv")
-create_images =False
+img_folder = os.path.join("data", "ai_ready", "images")
+train_img = os.path.join("data", "ai_ready", "train_images")
+val_img = os.path.join("data", "ai_ready", "val_images")
+labels_image = os.path.join("data", "ai_ready", "x-ai_data.csv")
+create_images = False
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tf.config.list_physical_devices()
-    print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+    print("Num GPUs Available: ", len(tf.config.list_physical_devices("GPU")))
     physical_devices = tf.config.list_physical_devices("GPU")
-    if len(physical_devices)>0:
+    if len(physical_devices) > 0:
         tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
     ## Move images to subfolders
