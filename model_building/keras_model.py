@@ -62,10 +62,12 @@ def create_data_augmentation_model():
         - data_augementation : keras layer, used in the make_model function
     """
     data_augmentation = keras.Sequential(
-        [
-            layers.RandomFlip("horizontal_and_vertical"),
-            layers.RandomRotation(0.1),
-        ]
+         [
+        layers.RandomFlip("horizontal_and_vertical"),
+        layers.RandomRotation(0.1),
+        layers.RandomContrast([0,1]),
+        layers.RandomTranslation(height_factor=0.2, width_factor=0.2)
+    ]
     )
     return data_augmentation
 
