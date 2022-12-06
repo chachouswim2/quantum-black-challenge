@@ -57,10 +57,10 @@ def val_set(val_path, image_size, batch_size):
 
 def create_data_augmentation_model():
     """
-    function to create the keras data_augmentation layer
-    args:
+    Function to create the keras data_augmentation layer
+    Input:
         - none
-    returns:
+    Output:
         - data_augementation : keras layer, used in the make_model function
     """
     data_augmentation = keras.Sequential(
