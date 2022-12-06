@@ -35,7 +35,6 @@ import warnings
 warnings.simplefilter("ignore", UserWarning)
 
 ## Set paths
-## Set paths
 img_folder = os.path.join("data","ai_ready","images")
 train_img = os.path.join("data","ai_ready","train_images")
 val_img = os.path.join("data","ai_ready","val_images")
