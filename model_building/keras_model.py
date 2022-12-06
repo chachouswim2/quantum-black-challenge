@@ -25,7 +25,8 @@ def train_set(train_path, image_size, batch_size):
 
     train_ds = tf.keras.preprocessing.image_dataset_from_directory(
         train_path,
-        validation_split=0,
+        validation_split=0.05,
+        subset="training",
         seed=123,
         image_size=image_size,
         batch_size=batch_size,
@@ -45,7 +46,8 @@ def val_set(val_path, image_size, batch_size):
     """
     val_ds = tf.keras.preprocessing.image_dataset_from_directory(
         val_path,
-        validation_split=0,
+        validation_split=0.05,
+        subset="validation",
         seed=123,
         image_size=image_size,
         batch_size=batch_size,
