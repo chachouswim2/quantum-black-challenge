@@ -169,4 +169,5 @@ def train_model(model, train_ds, val_ds, epochs):
         epochs=epochs,
         callbacks=callbacks,
         validation_data=val_ds,
+        verbose = 2
         )

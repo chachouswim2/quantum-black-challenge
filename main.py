@@ -35,10 +35,10 @@ import warnings
 warnings.simplefilter("ignore", UserWarning)
 
 ## Set paths
-img_folder = os.path.join("data","ai_ready","images")
-train_img = os.path.join("data","ai_ready","train_images")
-val_img = os.path.join("data","ai_ready","val_images")
-labels_image = os.path.join("data","ai_ready","x-ai_data.csv")
+img_folder = os.path.join(os.getcwd(),"data","ai_ready","images")
+train_img = os.path.join(os.getcwd(),"data","ai_ready","train_images")
+val_img = os.path.join(os.getcwd(),"data","ai_ready","val_images")
+labels_image = os.path.join(os.getcwd(),"data","ai_ready","x-ai_data.csv")
 create_images =False
 
 if __name__ == '__main__':
@@ -53,6 +53,7 @@ if __name__ == '__main__':
         subfolders(labels_image, img_folder, train_img, val_img)
 
     ## Model
+    # ipdb.set_trace()
     model = make_model(input_shape=config.image_size + (3,), num_classes=2)
 
     ## Train and Val dataset

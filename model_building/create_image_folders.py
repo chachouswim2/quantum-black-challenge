@@ -33,6 +33,7 @@ def subfolders(excel_file, img_folder, train_img, val_img):
         try:
             im = cv2.imread(os.path.join(img_folder,train0.loc[i,'filename']))
             cv2.imwrite(os.path.join(train_img,'0', train0.loc[i,'filename']), im)
+            print(os.path.join(train_img,'0', train0.loc[i,'filename']))
         except:
             ipdb.set_trace()
     #Move TRAIN images labeled 1 to the correct folder
