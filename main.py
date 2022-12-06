@@ -40,20 +40,14 @@ import warnings
 warnings.simplefilter("ignore", UserWarning)
 
 ## Set paths
-<<<<<<< HEAD
 img_folder = os.path.join(os.getcwd(),"data","ai_ready","images")
 train_img = os.path.join(os.getcwd(),"data","ai_ready","train_images")
 val_img = os.path.join(os.getcwd(),"data","ai_ready","val_images")
 labels_image = os.path.join(os.getcwd(),"data","ai_ready","x-ai_data.csv")
 create_images =False
-=======
-img_folder = os.path.join("data", "ai_ready", "images")
-train_img = os.path.join("data", "ai_ready", "train_images")
-val_img = os.path.join("data", "ai_ready", "val_images")
-labels_image = os.path.join("data", "ai_ready", "x-ai_data.csv")
-create_images = False
+
 plot_auc = False
->>>>>>> b2b9108f3bce8ba8145f754795273d81ddb8186f
+
 
 if __name__ == "__main__":
     tf.config.list_physical_devices()
