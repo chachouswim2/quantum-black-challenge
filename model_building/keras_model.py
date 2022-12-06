@@ -105,12 +105,12 @@ def make_model(input_shape: tuple, num_classes: int):
     for size in [256, 128]:
         x = layers.Activation("relu")(x)
         x = layers.SeparableConv2D(size, 3, padding="same")(x)
-        x = layers.BatchNormalization()(x)
-
+        x = layers.BatcDNormalization()(x)
+        x = layers.Dropout(config.dropout)(x)
         x = layers.Activation("relu")(x)
         x = layers.SeparableConv2D(size, 3, padding="same")(x)
         x = BatchNormalization()(x)
-
+        x = layers.Dropout(config.dropout)(x)
         x = MaxPooling2D(3, strides=2, padding="same")(x)
 
         # Project residual
@@ -122,6 +122,7 @@ def make_model(input_shape: tuple, num_classes: int):
 
     x = layers.SeparableConv2D(1024, 3, padding="same")(x)
     x = BatchNormalization()(x)
+    x = layers.Dropout(config.dropout)(x)
     x = layers.Activation("relu")(x)
 
     x = layers.GlobalAveragePooling2D()(x)
@@ -134,6 +135,7 @@ def make_model(input_shape: tuple, num_classes: int):
 
     x = layers.Dropout(0.5)(x)
     outputs = layers.Dense(units, activation=activation)(x)
+    
     cnn_model = keras.Model(inputs, outputs)
     return cnn_model  
 
