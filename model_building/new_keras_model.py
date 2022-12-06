@@ -2,11 +2,18 @@ import config
 import numpy as np
 import pandas as pd
 
-import keras 
+import keras
 from keras.initializers import RandomNormal
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
-from keras.layers import Activation, Dropout, Flatten, Dense
+from keras.layers import (
+    Activation,
+    Dropout,
+    Flatten,
+    Dense,
+    LeakyReLU,
+    BatchNormalization,
+)
 
 from keras.preprocessing.image import ImageDataGenerator
 
@@ -16,6 +23,7 @@ from tensorflow.keras import layers
 import config
 
 import warnings
+
 warnings.simplefilter("ignore", UserWarning)
 
 
@@ -30,18 +38,15 @@ def train_set(train_path, image_size, batch_size):
         train_generator: train set in Keras format
     """
     train_datagen = ImageDataGenerator(
-    rescale=1. / 255,
-    shear_range=0.2,
-    zoom_range=0.2,
-    horizontal_flip=True)
+        rescale=1.0 / 255, shear_range=0.2, zoom_range=0.2, horizontal_flip=True
+    )
 
     train_generator = train_datagen.flow_from_directory(
-        train_path,
-        target_size=image_size,
-        batch_size=batch_size,
-        class_mode='binary')
-    
+        train_path, target_size=image_size, batch_size=batch_size, class_mode="binary"
+    )
+
     return train_generator
+
 
 def val_set(val_path, image_size, batch_size):
     """
@@ -53,15 +58,14 @@ def val_set(val_path, image_size, batch_size):
     Output:
         val_generator: train set in Keras format
     """
-    test_datagen = ImageDataGenerator(rescale=1. / 255)
+    test_datagen = ImageDataGenerator(rescale=1.0 / 255)
 
     val_generator = test_datagen.flow_from_directory(
-        val_path,
-        target_size=image_size,
-        batch_size=batch_size,
-        class_mode='binary')
-    
+        val_path, target_size=image_size, batch_size=batch_size, class_mode="binary"
+    )
+
     return val_generator
+
 
 def test_set(test_path, image_size, batch_size):
     """
@@ -73,17 +77,18 @@ def test_set(test_path, image_size, batch_size):
     Output:
         test_generator: test set in Keras format
     """
-    test_datagen = ImageDataGenerator(rescale=1. / 255)
+    test_datagen = ImageDataGenerator(rescale=1.0 / 255)
 
     test_generator = test_datagen.flow_from_directory(
-    test_path,
-    target_size=image_size,
-    batch_size=batch_size,
-    class_mode=None,
-    shuffle=False
+        test_path,
+        target_size=image_size,
+        batch_size=batch_size,
+        class_mode=None,
+        shuffle=False,
     )
 
     return test_generator
+
 
 def keras_model(input_shape, train_g, val_g, batch_size, epochs, model_name):
     """
@@ -99,36 +104,52 @@ def keras_model(input_shape, train_g, val_g, batch_size, epochs, model_name):
         - keras_model : trained keras model
     """
     model = Sequential()
-    model.add(Conv2D(32, (2, 2), input_shape=(256,256,3)))
-    model.add(Activation('relu'))
+    model.add(Conv2D(128, (2, 2), input_shape=input_shape))
+    model.add(BatchNormalization())
+    model.add(Dropout(config.dropout))
+    model.add(LeakyReLU(0.2))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    
-    model.add(Conv2D(32, (2, 2)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    
+
     model.add(Conv2D(64, (2, 2)))
-    model.add(Activation('relu'))
+    model.add(BatchNormalization())
+    model.add(Dropout(config.dropout))
+    model.add(LeakyReLU(0.2))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    
+
+    model.add(Conv2D(64, (2, 2)))
+    model.add(Dropout(config.dropout))
+    model.add(LeakyReLU(0.2))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
     model.add(Flatten())
+    model.add(Dense(128))
+    model.add(BatchNormalization())
+    model.add(Dropout(config.dropout))
+    model.add(LeakyReLU(0.2))
     model.add(Dense(64))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dropout(config.dropout))
+    model.add(LeakyReLU(0.2))
     model.add(Dense(1))
-    model.add(Activation('sigmoid'))
+    model.add(Activation("sigmoid"))
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(1e-3),
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(1e-3),
         loss="binary_crossentropy",
-        metrics=["accuracy"],)
+        metrics=["accuracy"],
+    )
 
+    callbacks = [
+        keras.callbacks.ModelCheckpoint("save_at_{epoch}.keras"),
+        keras.callbacks.EarlyStopping(monitor="val_loss", patience=3),
+    ]
     model.fit_generator(
         train_g,
         steps_per_epoch=1400 // batch_size,
         epochs=epochs,
         validation_data=val_g,
-        validation_steps=400 // batch_size)
-    
-    model.save(model_name +".h5")
+        validation_steps=400 // batch_size,
+        callbacks=callbacks,
+    )
 
-    
+    model.save(model_name + ".h5")

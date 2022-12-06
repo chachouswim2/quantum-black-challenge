@@ -132,8 +132,8 @@ class QB_Dataset(Dataset):
 class single_output_model(nn.Module):
     def __init__(
         self,
-        channels_img:int,
-        features_d:int,
+        channels_img: int,
+        features_d: int,
         neuron_mid_layer: int = 40,
         dropout: float = 0.4,
     ) -> None:
@@ -149,9 +149,7 @@ class single_output_model(nn.Module):
 
         self.disc = nn.Sequential(
             # input: N x channels_img x 64 x 64
-            nn.Conv2d(
-                channels_img, features_d, kernel_size=4, stride=2, padding=1
-            ),
+            nn.Conv2d(channels_img, features_d, kernel_size=4, stride=2, padding=1),
             nn.LeakyReLU(0.2),
             # _block(in_channels, out_channels, kernel_size, stride, padding)
             self._block(features_d, features_d * 2, 4, 2, 1),
@@ -162,7 +160,7 @@ class single_output_model(nn.Module):
             nn.Sigmoid(),
         )
 
-    def _block(self, in_channels, out_channels, kernel_size, stride, padding,dropout):
+    def _block(self, in_channels, out_channels, kernel_size, stride, padding, dropout):
         return nn.Sequential(
             nn.Conv2d(
                 in_channels,
@@ -172,7 +170,7 @@ class single_output_model(nn.Module):
                 padding,
                 bias=False,
             ),
-            #nn.BatchNorm2d(out_channels),
+            # nn.BatchNorm2d(out_channels),
             nn.Dropout(dropout),
             nn.LeakyReLU(0.2),
         )
@@ -203,7 +201,7 @@ class qb_model:
 
     def train(
         self,
-        train_data:QB_Dataset,
+        train_data: QB_Dataset,
         val_data: QB_Dataset,
         learning_rate: float,
         use_samplers: bool = True,
