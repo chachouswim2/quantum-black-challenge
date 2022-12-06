@@ -63,7 +63,7 @@ def create_data_augmentation_model():
     """
     data_augmentation = keras.Sequential(
         [
-            layers.RandomFlip("horizontal"),
+            layers.RandomFlip("horizontal_and_vertical"),
             layers.RandomRotation(0.1),
         ]
     )
