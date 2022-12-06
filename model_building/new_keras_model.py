@@ -38,8 +38,11 @@ def train_set(train_path, image_size, batch_size):
         train_generator: train set in Keras format
     """
     train_datagen = ImageDataGenerator(
-        rescale=1.0 / 255, shear_range=0.2, zoom_range=0.2, horizontal_flip=True
-    )
+        rescale=1. / 255,
+        shear_range=0.2,
+        horizontal_flip=True,
+        vertical_flip=True,
+        brightness_range = [0.5, 2.0])
 
     train_generator = train_datagen.flow_from_directory(
         train_path, target_size=image_size, batch_size=batch_size, class_mode="binary"
