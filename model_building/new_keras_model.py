@@ -107,52 +107,35 @@ def keras_model(input_shape, train_g, val_g, batch_size, epochs, model_name):
         - keras_model : trained keras model
     """
     model = Sequential()
-    model.add(Conv2D(128, (2, 2), input_shape=input_shape))
-    model.add(BatchNormalization())
-    model.add(Dropout(config.dropout))
+    model.add(Conv2D(32, (2, 2), input_shape=(256,256,3)))
+    model.add(LeakyReLU(0.2))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Conv2D(32, (2, 2)))
     model.add(LeakyReLU(0.2))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Conv2D(64, (2, 2)))
-    model.add(BatchNormalization())
-    model.add(Dropout(config.dropout))
-    model.add(LeakyReLU(0.2))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Conv2D(64, (2, 2)))
-    model.add(Dropout(config.dropout))
     model.add(LeakyReLU(0.2))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())
-    model.add(Dense(128))
-    model.add(BatchNormalization())
-    model.add(Dropout(config.dropout))
-    model.add(LeakyReLU(0.2))
     model.add(Dense(64))
-    model.add(BatchNormalization())
-    model.add(Dropout(config.dropout))
     model.add(LeakyReLU(0.2))
+    model.add(Dropout(0.5))
     model.add(Dense(1))
-    model.add(Activation("sigmoid"))
+    model.add(Activation('sigmoid'))
 
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(1e-3),
+    model.compile(optimizer=tf.keras.optimizers.Adam(1e-3),
         loss="binary_crossentropy",
-        metrics=["accuracy"],
-    )
+        metrics=["accuracy"],)
 
-    callbacks = [
-        keras.callbacks.ModelCheckpoint("save_at_{epoch}.keras"),
-        keras.callbacks.EarlyStopping(monitor="val_loss", patience=3),
-    ]
     model.fit_generator(
         train_g,
         steps_per_epoch=1400 // batch_size,
         epochs=epochs,
         validation_data=val_g,
         validation_steps=400 // batch_size,
-        callbacks=callbacks,
     )
 
     model.save(model_name + ".h5")
