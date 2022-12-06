@@ -6,10 +6,10 @@ import os
 import random
 
 import sys
-sys.path.append('model_building/create_image_folders.py')
-import subfolders 
-sys.path.append('model_building/keras_model.py')
-import make_model 
+# sys.path.append('model_building/create_image_folders.py')
+# sys.path.append('model_building/keras_model.py')
+from model_building.create_image_folders import *
+from model_building.keras_model import *
 import config
 
 import matplotlib.pyplot as plt
@@ -46,12 +46,16 @@ img_folder = "/home/jovyan/my_work/QB/image/images/"
 train_img = "/home/jovyan/my_work/QB/image/train/"
 val_img = "/home/jovyan/my_work/QB/image/val/"
 labels_image = "data/ai_ready/x-ai_data.csv"
+if __name__ == '__main__':
+    tf.config.list_physical_devices()
+    print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+    physical_devices = tf.config.list_physical_devices("GPU")
+    tf.config.experimental.set_memory_growth(physical_devices[0], True)
+    ## Move images to subfolders
+    subfolders(labels_image, img_folder, train_img, val_img)
 
-## Move images to subfolders
-subfolders(labels_image, img_folder, train_img, val_img)
+    ## Model
+    model = make_model(input_shape=config.image_size + (3,), num_classes=2)
 
-## Model
-model = make_model(input_shape=image_size + (3,), num_classes=2)
-
-## Train Model
-train_model(model, )
+    ## Train Model
+    train_model(model, )
