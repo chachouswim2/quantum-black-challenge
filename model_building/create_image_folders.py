@@ -1,7 +1,8 @@
 import cv2
 import pandas as pd
 import shutil
-
+import os
+import ipdb
 #Create a function to split data between train and validation and between 0 and 1 labels"
 
 def subfolders(excel_file, img_folder, train_img, val_img):
@@ -29,14 +30,32 @@ def subfolders(excel_file, img_folder, train_img, val_img):
 
     #Move TRAIN images labeled 0 to the correct folder
     for i in train0.index:
-        im = cv2.imread(img_folder+train0.loc[i,'filename'])
-        cv2.imwrite(train_img + '0/' +train0.loc[i,'filename'], im)
+        try:
+            im = cv2.imread(os.path.join(img_folder,train0.loc[i,'filename']))
+            cv2.imwrite(os.path.join(train_img,'0', train0.loc[i,'filename']), im)
+        except:
+            ipdb.set_trace()
     #Move TRAIN images labeled 1 to the correct folder
     for i in train1.index:
-        im = cv2.imread(img_folder+train1.loc[i,'filename'])
-        cv2.imwrite(train_img+'1/' +train1.loc[i,'filename'], im)
+        im = cv2.imread(os.path.join(img_folder,train1.loc[i,'filename']))
+        cv2.imwrite(os.path.join(train_img,'1', train1.loc[i,'filename']), im)
+
+    for i in val0.index:
+        im = cv2.imread(os.path.join(img_folder,val0.loc[i,'filename']))
+        cv2.imwrite(os.path.join(val_img,'0', val0.loc[i,'filename']), im)
+
+    #Move TRAIN images labeled 1 to the correct folder
+    for i in val1.index:
+        im = cv2.imread(os.path.join(img_folder,val1.loc[i,'filename']))
+        cv2.imwrite(os.path.join(val_img,'1', val.loc[i,'filename']), im)
 
     #Remove hidden file
-    shutil.rmtree("image/train/.ipynb_checkpoints")
-    shutil.rmtree("image/val/.ipynb_checkpoints")
+    try:
+        shutil.rmtree("image/train/.ipynb_checkpoints")
+        shutil.rmtree("image/val/.ipynb_checkpoints")
+    except:
+        pass
 
+
+if __name__ == '__main__':
+    subfolders
