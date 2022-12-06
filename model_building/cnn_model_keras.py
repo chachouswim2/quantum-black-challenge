@@ -4,7 +4,7 @@ import pandas as pd
 
 import keras 
 from keras.initializers import RandomNormal
-from keras.layers import Dense, Flatten, Activation, LeakyReLU
+from keras.layers import Dense, Flatten, Activation, LeakyReLU, Dropout
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Dropout, BatchNormalization
 
@@ -92,26 +92,26 @@ def make_model(input_shape: tuple, num_classes: int):
     x = layers.Rescaling(1.0 / 255)(x)
     x = Conv2D(32, 3, strides=2, padding="same")(x)
     x = BatchNormalization()(x)
-    x = Dropout(config.dropout)
+    x = Dropout(config.dropout)(x)
     x = LeakyReLU(alpha=0.2)(x)
 
     x = Conv2D(64, 3, padding="same")(x)
     x = BatchNormalization()(x)
-    x = Dropout(config.dropout)
+    x = Dropout(config.dropout)(x)
     x = LeakyReLU(alpha=0.2)(x)
 
     previous_block_activation = x  # Set aside residual
 
     for size in [256, 128]:
-        x = layers.Activation("relu")(x)
         x = layers.SeparableConv2D(size, 3, padding="same")(x)
-        x = layers.BatcDNormalization()(x)
-        x = layers.Dropout(config.dropout)(x)
-        x = layers.Activation("relu")(x)
+        x = layers.BatchNormalization()(x)
+        x = Dropout(config.dropout)(x)
+        x = LeakyReLU(0.2)(x)
         x = layers.SeparableConv2D(size, 3, padding="same")(x)
         x = BatchNormalization()(x)
         x = layers.Dropout(config.dropout)(x)
         x = MaxPooling2D(3, strides=2, padding="same")(x)
+        x = LeakyReLU(0.2)(x)
 
         # Project residual
         residual = layers.Conv2D(size, 1, strides=2, padding="same")(
@@ -134,6 +134,9 @@ def make_model(input_shape: tuple, num_classes: int):
         units = num_classes
 
     x = layers.Dropout(0.5)(x)
+    x = Dense(100,activation=activation)(x)
+    x = BatchNormalization()(x)
+    x = Dropout(config.dropout)(x)
     outputs = layers.Dense(units, activation=activation)(x)
     
     cnn_model = keras.Model(inputs, outputs)
