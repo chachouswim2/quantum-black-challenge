@@ -26,7 +26,8 @@ def train_set(train_path, image_size, batch_size):
 
     train_ds = tf.keras.preprocessing.image_dataset_from_directory(
         train_path,
-        validation_split=0,
+        validation_split=0.05,
+        subset="training",
         seed=123,
         image_size=image_size,
         batch_size=batch_size,
@@ -46,7 +47,8 @@ def val_set(val_path, image_size, batch_size):
     """
     val_ds = tf.keras.preprocessing.image_dataset_from_directory(
         val_path,
-        validation_split=0,
+        validation_split=0.05,
+        subset="validation",
         seed=123,
         image_size=image_size,
         batch_size=batch_size,
@@ -63,10 +65,12 @@ def create_data_augmentation_model():
         - data_augementation : keras layer, used in the make_model function
     """
     data_augmentation = keras.Sequential(
-        [
-            layers.RandomFlip("horizontal"),
-            layers.RandomRotation(0.1),
-        ]
+         [
+        layers.RandomFlip("horizontal_and_vertical"),
+        layers.RandomRotation(0.1),
+        layers.RandomContrast([0,1]),
+        layers.RandomTranslation(height_factor=0.2, width_factor=0.2)
+    ]
     )
     return data_augmentation
 
