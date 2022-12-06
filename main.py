@@ -31,6 +31,8 @@ from keras.utils.np_utils import to_categorical
 from keras.models import Model
 from keras.models import Sequential
 from keras.callbacks import EarlyStopping
+from sklearn.metrics import roc_curve,auc, roc_auc_score
+import matplotlib.pyplot as plt
 
 from tensorflow.keras import layers
 import warnings
@@ -43,6 +45,7 @@ train_img = os.path.join("data", "ai_ready", "train_images")
 val_img = os.path.join("data", "ai_ready", "val_images")
 labels_image = os.path.join("data", "ai_ready", "x-ai_data.csv")
 create_images = False
+plot_auc = False
 
 if __name__ == "__main__":
     tf.config.list_physical_devices()
@@ -64,3 +67,19 @@ if __name__ == "__main__":
 
     ## Train Model
     train_model(model, train_ds, val_ds, config.number_epochs)
+
+    y_test = np.ones(len(train_ds))
+    probs = model.predict_proba(X_test)
+    preds = probs[:,1]
+    fpr, tpr, threshold = roc_curve(y_test, preds)
+    roc_auc = roc_auc_score(fpr, tpr)
+
+    plt.title('Receiver Operating Characteristic')
+    plt.plot(fpr, tpr, 'b', label = f'AUC = {roc_auc :0.2f}')
+    plt.legend(loc = 'lower right')
+    plt.plot([0, 1], [0, 1],'r--')
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.ylabel('True Positive Rate')
+    plt.xlabel('False Positive Rate')
+    plt.show()
