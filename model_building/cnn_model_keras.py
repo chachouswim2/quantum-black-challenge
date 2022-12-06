@@ -4,13 +4,14 @@ import pandas as pd
 
 import keras 
 from keras.initializers import RandomNormal
-from keras.layers import Dense, Flatten, Activation
+from keras.layers import Dense, Flatten, Activation, LeakyReLU, Dropout
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Dropout, BatchNormalization
 
 import tensorflow as tf
-from tensorflow.keras.optimizers import SGD
+from tensorflow.keras.optimizers import SGD, Adam
 from tensorflow.keras import layers
+import config
 
 def train_set(train_path, image_size, batch_size):
     """
@@ -89,26 +90,28 @@ def make_model(input_shape: tuple, num_classes: int):
 
     # Entry block
     x = layers.Rescaling(1.0 / 255)(x)
-    x = layers.Conv2D(32, 3, strides=2, padding="same")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
+    x = Conv2D(32, 3, strides=2, padding="same")(x)
+    x = BatchNormalization()(x)
+    x = Dropout(config.dropout)(x)
+    x = LeakyReLU(alpha=0.2)(x)
 
-    x = layers.Conv2D(64, 3, padding="same")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
+    x = Conv2D(64, 3, padding="same")(x)
+    x = BatchNormalization()(x)
+    x = Dropout(config.dropout)(x)
+    x = LeakyReLU(alpha=0.2)(x)
 
     previous_block_activation = x  # Set aside residual
 
-    for size in [128, 256, 512, 728]:
-        x = layers.Activation("relu")(x)
+    for size in [256, 128]:
         x = layers.SeparableConv2D(size, 3, padding="same")(x)
         x = layers.BatchNormalization()(x)
-
-        x = layers.Activation("relu")(x)
+        x = Dropout(config.dropout)(x)
+        x = LeakyReLU(0.2)(x)
         x = layers.SeparableConv2D(size, 3, padding="same")(x)
-        x = layers.BatchNormalization()(x)
-
-        x = layers.MaxPooling2D(3, strides=2, padding="same")(x)
+        x = BatchNormalization()(x)
+        x = layers.Dropout(config.dropout)(x)
+        x = MaxPooling2D(3, strides=2, padding="same")(x)
+        x = LeakyReLU(0.2)(x)
 
         # Project residual
         residual = layers.Conv2D(size, 1, strides=2, padding="same")(
@@ -118,7 +121,8 @@ def make_model(input_shape: tuple, num_classes: int):
         previous_block_activation = x  # Set aside next residual
 
     x = layers.SeparableConv2D(1024, 3, padding="same")(x)
-    x = layers.BatchNormalization()(x)
+    x = BatchNormalization()(x)
+    x = layers.Dropout(config.dropout)(x)
     x = layers.Activation("relu")(x)
 
     x = layers.GlobalAveragePooling2D()(x)
@@ -130,7 +134,11 @@ def make_model(input_shape: tuple, num_classes: int):
         units = num_classes
 
     x = layers.Dropout(0.5)(x)
+    x = Dense(100,activation=activation)(x)
+    x = BatchNormalization()(x)
+    x = Dropout(config.dropout)(x)
     outputs = layers.Dense(units, activation=activation)(x)
+    
     cnn_model = keras.Model(inputs, outputs)
     return cnn_model  
 
@@ -148,6 +156,7 @@ def train_model(model, train_ds, val_ds, epochs):
 
     callbacks = [
     keras.callbacks.ModelCheckpoint("save_at_{epoch}.keras"),
+    keras.callbacks.EarlyStopping(monitor='val_loss',patience=3)
     ]
     model.compile(
         optimizer=tf.keras.optimizers.Adam(1e-3),
