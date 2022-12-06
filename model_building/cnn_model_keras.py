@@ -7,7 +7,8 @@ from keras.initializers import RandomNormal
 from keras.layers import Dense, Flatten, Activation, LeakyReLU, Dropout
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Dropout, BatchNormalization
-
+from keras.models import Sequential
+from keras.layers import Activation, Dropout, Flatten, Dense
 import tensorflow as tf
 from tensorflow.keras.optimizers import SGD, Adam
 from tensorflow.keras import layers
@@ -56,23 +57,6 @@ def val_set(val_path, image_size, batch_size):
 
     return val_ds
 
-def create_data_augmentation_model():
-    """
-    Function to create the keras data_augmentation layer
-    Input:
-        - none
-    Output:
-        - data_augementation : keras layer, used in the make_model function
-    """
-    data_augmentation = keras.Sequential(
-         [
-        layers.RandomFlip("horizontal_and_vertical"),
-        layers.RandomRotation(0.1),
-        layers.RandomContrast([0,1]),
-        layers.RandomTranslation(height_factor=0.2, width_factor=0.2)
-    ]
-    )
-    return data_augmentation
 
 def make_model(input_shape: tuple, num_classes: int):
     """
@@ -142,6 +126,49 @@ def make_model(input_shape: tuple, num_classes: int):
     cnn_model = keras.Model(inputs, outputs)
     return cnn_model  
 
+def create_data_augmentation_model():
+    """
+    Function to create the keras data_augmentation layer
+    Input:
+        - none
+    Output:
+        - data_augementation : keras layer, used in the make_model function
+    """
+    data_augmentation = keras.Sequential(
+         [
+        layers.Rescaling(1./255.),
+        layers.RandomFlip("horizontal_and_vertical"),
+        layers.RandomRotation(0.1),
+        layers.RandomContrast([0,1]),
+        layers.RandomTranslation(height_factor=0.2, width_factor=0.2)
+    ]
+    )
+    return data_augmentation
+
+def simple_model(num_classes:int):
+
+    model = Sequential()
+    model.add(Conv2D(32, (2, 2), input_shape=(256,256,3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Conv2D(32, (2, 2)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Conv2D(64, (2, 2)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Flatten())
+    model.add(Dense(64))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(1))
+    model.add(Activation('sigmoid'))
+    
+    return model
+
 def train_model(model, train_ds, val_ds, epochs):
     """
     Train a Keras CNN Model and output accuracy
@@ -166,8 +193,10 @@ def train_model(model, train_ds, val_ds, epochs):
 
     model.fit(
         train_ds,
+        # steps_per_epoch=1400//config.batch_size,
         epochs=epochs,
         callbacks=callbacks,
         validation_data=val_ds,
+        # validation_steps = 1400//config.batch_size,
         verbose = 2
         )

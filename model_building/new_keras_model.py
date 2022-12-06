@@ -42,7 +42,7 @@ def train_set(train_path, image_size, batch_size):
         shear_range=0.2,
         horizontal_flip=True,
         vertical_flip=True,
-        brightness_range = [0.5, 2.0])
+        # brightness_range = [0.5, 2.0])
 
     train_generator = train_datagen.flow_from_directory(
         train_path, target_size=image_size, batch_size=batch_size, class_mode="binary"
