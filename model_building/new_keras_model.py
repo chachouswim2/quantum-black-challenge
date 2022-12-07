@@ -180,7 +180,7 @@ def train_model(model, train_ds, val_ds, epochs):
         callbacks = callbacks
         )
     
-    model.save("last_keras_model.h5")
+    model.save("model_with_test.h5")
                
     preds = model.predict_generator(val_ds)
     number_of_examples = len(val_ds.filenames)
