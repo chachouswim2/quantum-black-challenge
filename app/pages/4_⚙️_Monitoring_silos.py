@@ -4,10 +4,10 @@ import pandas as pd
 import streamlit as st
 from haversine import haversine
 from streamlit_folium import st_folium
-from utils import monitoring_dashboard
+from pages.utils import monitoring_dashboard
 
 
-st.set_page_config(layout="wide", page_title="Monitor my silos", page_icon=":pushpin:")
+st.set_page_config(layout="wide", page_title="Monitor my silos", page_icon=":gear:")
 st.title('Monitor my silos')
 
 fillValues = pd.read_csv("data/fill_values_silos.csv")

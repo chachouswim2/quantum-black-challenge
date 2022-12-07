@@ -15,7 +15,7 @@ def load_model():
     
 @st.cache(allow_output_mutation=True)
 def load_modelseg():
-    model = keras.models.load_model('silo_segmentation.h5', compile=False)
+    model = keras.models.load_model('silo_segmentation_last_adagrad.h5', compile=False)
     return model
     
 model = load_model()
@@ -58,10 +58,9 @@ if upload is not None:
                     with c3:
                         img = img * 255
                         prob_seg = model_seg.predict(img)
-                        fig, ax = plt.subplots()
-                        prob_seg = prob_seg[0].reshape(256, 256)
-                        ax.imshow(prob_seg, cmap='gray')
-                        ax.axis('off')
-                        st.pyplot(fig)
+                        prob_seg = prob_seg[0].reshape(256,256) * 255
+                        prob_seg = Image.fromarray(prob_seg)
+                        prob_seg = prob_seg.convert("RGB")
+                        st.image(prob_seg)
                 else:
                     st.error(f"No silos have been identified in this picture.", icon="❌")
