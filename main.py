@@ -32,7 +32,7 @@ from keras.utils.np_utils import to_categorical
 from keras.models import Model
 from keras.models import Sequential
 from keras.callbacks import EarlyStopping
-from sklearn.metrics import roc_curve,auc, roc_auc_score
+from sklearn.metrics import roc_curve,auc, roc_auc_score,accuracy_score
 import matplotlib.pyplot as plt
 
 from tensorflow.keras import layers
@@ -73,9 +73,9 @@ if __name__ == "__main__":
     ## Train Model
     f1_score_val = train_model(model, train_ds, val_ds, config.number_epochs)
     print(f"the f1_socre for the val set is :{f1_score_val}")
-    test_set = test_set(test_img, config.image_size, config.batch_size)
-    y_preds=test_model(test_set, model, 1)
-    number_of_examples = len(test_set.filenames)
+    test_ds = test_set(val_img, config.image_size, config.batch_size)
+    y_preds=test_model(val_ds, model, 1)
+    number_of_examples = len(val_ds.filenames)
     number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size)) 
     # 1.0 above is to skip integer division
 
@@ -86,8 +86,12 @@ if __name__ == "__main__":
         true_labels.extend(np.array(val_ds[i][1]))
     y_test = true_labels[:len(y_preds)]
 
-    f1_score_test = f1_score(y_test, 1*(y_preds>0.5))
+
+    # print(f"accuracy score for test is {accurcay_test}")
     try:
+        f1_score_test = f1_score(y_test, 1*(y_preds>0.5))
+        # accuracy_test = accuracy_score(y_test, 1*(y_preds>0.5))
+        print(f"the f1_score test is {f1_score_test}")
         fpr, tpr, threshold = roc_curve(y_test, y_preds)
         roc_auc = auc(fpr, tpr)
     except:
@@ -102,3 +106,4 @@ if __name__ == "__main__":
     plt.xlabel('False Positive Rate')
     plt.savefig('auc_curve')
     plt.show()
+    ipdb.set_trace()
