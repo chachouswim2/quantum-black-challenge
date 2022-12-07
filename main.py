@@ -112,7 +112,7 @@ if __name__ == "__main__":
         ipdb.set_trace()
     df_preds = df_labels[df_labels['split']=="test"].copy()
     df_preds["preds_proba"] = y_preds
-    df_preds.to_csv('df_preds.csv')
+    df_preds.to_csv('class_predicted.csv', index=False)
     plt.title('Receiver Operating Characteristic')
     plt.plot(fpr, tpr, color='#285430', label = f'AUC = {roc_auc :0.2f}')
     plt.legend(loc = 'lower right')
@@ -124,5 +124,5 @@ if __name__ == "__main__":
     plt.savefig('auc_curve')
     plt.show()
     
-    output_preds(y_preds, train_ds, test_ds, 'last_keras_preds')
+    output_preds(y_preds, train_ds, test_ds, 'class predicted2')
 
