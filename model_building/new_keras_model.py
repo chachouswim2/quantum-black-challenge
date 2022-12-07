@@ -1,7 +1,7 @@
 import config
 import numpy as np
 import pandas as pd
-
+import sys
 import keras
 from keras.initializers import RandomNormal
 from keras.models import Sequential
@@ -25,6 +25,8 @@ from model_test.test_model import *
 from sklearn.metrics import roc_auc_score, roc_curve, f1_score
 
 import warnings
+import ipdb
+import math
 
 warnings.simplefilter("ignore", UserWarning)
 
@@ -41,16 +43,16 @@ def train_set(train_path, image_size, batch_size):
     """
     train_datagen = ImageDataGenerator(
         rescale=1. / 255,
-        shear_range=0.2,
-        horizontal_flip=True,
-        vertical_flip=True,
+        # shear_range=0.2,
+        # horizontal_flip=True,
+        # vertical_flip=True,
         # brightness_range = [0.5, 2.0]
         )
 
     train_generator = train_datagen.flow_from_directory(
         train_path, target_size=image_size, batch_size=batch_size, class_mode="binary"
     )
-
+    print('train set generator created, test')
     return train_generator
 
 
@@ -96,7 +98,7 @@ def test_set(test_path, image_size, batch_size):
     return test_generator
 
 
-def keras_model(input_shape, train_g, val_g, batch_size, epochs, model_name):
+def keras_model(input_shape):
     """
     function building a keras deep learning model for image recognition
     Inputs:
@@ -110,7 +112,7 @@ def keras_model(input_shape, train_g, val_g, batch_size, epochs, model_name):
         - keras_model : trained keras model
     """
     model = Sequential()
-    model.add(Conv2D(64, (2, 2), input_shape=(256,256,3)))
+    model.add(Conv2D(64, (2, 2), input_shape=input_shape))
     model.add(LeakyReLU(0.2))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
@@ -126,11 +128,13 @@ def keras_model(input_shape, train_g, val_g, batch_size, epochs, model_name):
     model.add(Dense(64))
     model.add(LeakyReLU(0.2))
     model.add(Dropout(0.5))
+    model.add(Dense(64))
+    model.add(LeakyReLU(0.2))
+    model.add(Dropout(0.5))
     model.add(Dense(1))
     model.add(Activation('sigmoid'))
 
     return model
-
 def train_model(model, train_ds, val_ds, epochs):
     """
     Train a Keras CNN Model and output accuracy
@@ -148,7 +152,7 @@ def train_model(model, train_ds, val_ds, epochs):
     keras.callbacks.EarlyStopping(monitor='val_loss',patience=3)
     ]
     model.compile(
-        optimizer=tf.keras.optimizers.Adam(1e-3),
+        optimizer=tf.keras.optimizers.Adam(config.learning_rate),
         loss="binary_crossentropy",
         metrics=["accuracy"],
         )
@@ -159,8 +163,21 @@ def train_model(model, train_ds, val_ds, epochs):
         epochs=config.number_epochs ,
         validation_data=val_ds,
         validation_steps=400 // config.batch_size,
-        verbose = 2
+        verbose = 1,
+        callbacks = callbacks
         )
-    preds = test_model(val_ds, model, config.batch_size)
-    true_labels = (val_ds.class_indices)
-    return f1_score(true_labels, 1*(preds>0.5))
+    try:
+        preds = model.predict_generator(val_ds)
+        number_of_examples = len(val_ds.filenames)
+        number_of_generator_calls = math.ceil(number_of_examples / (1.0 * 40)) 
+        # 1.0 above is to skip integer division
+
+        true_labels = []
+
+        for i in range(0,int(number_of_generator_calls)):
+            true_labels.extend(np.array(val_ds[i][1]))
+        f1_score_val = f1_score(true_labels, 1*(preds>0.5))
+        return f1_score_val
+    except:
+        sys.exit()
+    

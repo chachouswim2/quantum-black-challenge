@@ -12,7 +12,7 @@ sys.path.append("model_building/create_image_folders.py")
 from model_building.create_image_folders import *
 
 sys.path.append("model_building/keras_model.py")
-from model_building.cnn_model_keras import *
+# from model_building.cnn_model_keras import *
 from model_building.new_keras_model import *
 
 import matplotlib.pyplot as plt
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     ## Model
     # ipdb.set_trace()
-    model = make_model(input_shape=config.image_size + (3,), num_classes=2)
+    model = keras_model(input_shape=config.image_size + (3,))
 
     ## Train and Val dataset
     train_ds = train_set(train_img, config.image_size, config.batch_size)
