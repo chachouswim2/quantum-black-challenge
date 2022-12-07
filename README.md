@@ -22,3 +22,17 @@ Folder containing the python file to test the model and make prediction.
 
 ### app
 Folder containing the file to create a web app that integrates the model and its predictions.
+
+**Instructions to create the app:**
+
+- Create a new environment:
+
+```pipenv shell```
+
+- Install requirements:
+
+```pip install -r requirements.txt```
+
+- Launch the app:
+
+```streamlit run Home.py```
