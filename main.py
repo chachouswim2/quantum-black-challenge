@@ -73,9 +73,9 @@ if __name__ == "__main__":
     ## Train Model
     f1_score_val = train_model(model, train_ds, val_ds, config.number_epochs)
     print(f"the f1_socre for the val set is :{f1_score_val}")
-    test_set = test_set(test_img, config.image_size, config.batch_size)
-    y_preds=test_model(test_set, model, 1)
-    number_of_examples = len(test_set.filenames)
+    test_ds = test_set(test_img, config.image_size, config.batch_size)
+    y_preds=test_model(test_ds, model, 1)
+    number_of_examples = len(test_ds.filenames)
     number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size)) 
     # 1.0 above is to skip integer division
 
@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
     for i in range(0,int(number_of_generator_calls)):
         # print(np.array(val_ds[i][1]).shape[0])
-        true_labels.extend(np.array(val_ds[i][1]))
+        true_labels.extend(np.array(test_ds[i][1]))
     y_test = true_labels[:len(y_preds)]
 
     f1_score_test = f1_score(y_test, 1*(y_preds>0.5))
@@ -102,3 +102,5 @@ if __name__ == "__main__":
     plt.xlabel('False Positive Rate')
     plt.savefig('auc_curve')
     plt.show()
+    
+    output_preds(y_preds, train_ds, test_ds, 'last_keras_preds')
