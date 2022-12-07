@@ -14,7 +14,7 @@ from streamlit_folium import folium_static
 import asyncio
 import time
 
-st.set_page_config(layout="wide", page_title="Rank areas of interest", page_icon=":cloud:")
+st.set_page_config(layout="wide", page_title="Rank areas of interest", page_icon=":sleuth_or_spy:")
 st.title("Finding areas of interest for Foodix silos")
 st.subheader('Based on climatic conditions in Iowa')
 

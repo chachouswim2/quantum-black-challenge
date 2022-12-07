@@ -32,6 +32,8 @@ img_width, img_height = 256, 256
 def get_pos(lat,lng):
     return lat,lng
 
+st.write("Click on the map to extract satellite data from any location:")
+
 c1, c2 = st.columns((2, 1))
 
 with c2:
