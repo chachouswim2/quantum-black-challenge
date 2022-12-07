@@ -27,9 +27,24 @@ from sklearn.metrics import roc_auc_score, roc_curve, f1_score
 import warnings
 import ipdb
 import math
-
+import cv2
 warnings.simplefilter("ignore", UserWarning)
 
+def myFunc(image):
+    return cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+                        #COLOR_RGB2HSV)
+
+# Calling ImageDataGenerator for creating data augmentation generator.
+datagen = ImageDataGenerator(
+    rotation_range=90,
+    shear_range=0.2,
+    horizontal_flip=True,
+    vertical_flip=True,
+    # brightness_range = [0.5, 2.0],
+    zca_whitening =True,
+    preprocessing_function = myFunc
+    # zoom_range=0.3
+)
 
 def train_set(train_path, image_size, batch_size):
     """
@@ -43,10 +58,13 @@ def train_set(train_path, image_size, batch_size):
     """
     train_datagen = ImageDataGenerator(
         rescale=1. / 255,
-        # shear_range=0.2,
+        # rotation_range=90,
+        # # shear_range=0.2,
         # horizontal_flip=True,
         # vertical_flip=True,
-        # brightness_range = [0.5, 2.0]
+        # zca_whitening =True,
+        # # brightness_range = [0.5, 2.0],
+        # preprocessing_function = myFunc,
         )
 
     train_generator = train_datagen.flow_from_directory(
@@ -66,7 +84,10 @@ def val_set(val_path, image_size, batch_size):
     Output:
         val_generator: train set in Keras format
     """
-    test_datagen = ImageDataGenerator(rescale=1.0 / 255)
+    test_datagen = ImageDataGenerator(
+        rescale=1.0 / 255,
+        # preprocessing_function = myFunc,
+    )
 
     val_generator = test_datagen.flow_from_directory(
         val_path, target_size=image_size, batch_size=batch_size, class_mode="binary"
@@ -85,7 +106,10 @@ def test_set(test_path, image_size, batch_size):
     Output:
         test_generator: test set in Keras format
     """
-    test_datagen = ImageDataGenerator(rescale=1.0 / 255)
+    test_datagen = ImageDataGenerator(
+        rescale=1.0 / 255,
+        # preprocessing_function = myFunc,
+    )
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
@@ -114,23 +138,26 @@ def keras_model(input_shape):
     model = Sequential()
     model.add(Conv2D(64, (2, 2), input_shape=input_shape))
     model.add(LeakyReLU(0.2))
+    # model.add(Dropout(config.dropout))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Conv2D(64, (2, 2)))
     model.add(LeakyReLU(0.2))
+    # model.add(Dropout(config.dropout))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(64, (2, 2)))
+    model.add(Conv2D(32, (2, 2)))
     model.add(LeakyReLU(0.2))
+    # model.add(Dropout(config.dropout))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())
     model.add(Dense(64))
     model.add(LeakyReLU(0.2))
-    model.add(Dropout(0.5))
+    model.add(Dropout(config.dropout))
     model.add(Dense(64))
     model.add(LeakyReLU(0.2))
-    model.add(Dropout(0.5))
+    model.add(Dropout(config.dropout))
     model.add(Dense(1))
     model.add(Activation('sigmoid'))
 
@@ -149,7 +176,7 @@ def train_model(model, train_ds, val_ds, epochs):
 
     callbacks = [
     keras.callbacks.ModelCheckpoint("save_at_{epoch}.keras"),
-    keras.callbacks.EarlyStopping(monitor='val_loss',patience=3)
+    keras.callbacks.EarlyStopping(monitor='val_loss',patience=5)
     ]
     model.compile(
         optimizer=tf.keras.optimizers.Adam(config.learning_rate),
@@ -166,18 +193,15 @@ def train_model(model, train_ds, val_ds, epochs):
         verbose = 1,
         callbacks = callbacks
         )
-    try:
-        preds = model.predict_generator(val_ds)
-        number_of_examples = len(val_ds.filenames)
-        number_of_generator_calls = math.ceil(number_of_examples / (1.0 * 40)) 
-        # 1.0 above is to skip integer division
+    preds = model.predict_generator(val_ds)
+    number_of_examples = len(val_ds.filenames)
+    number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size)) 
+    # 1.0 above is to skip integer division
 
-        true_labels = []
+    true_labels = []
 
-        for i in range(0,int(number_of_generator_calls)):
-            true_labels.extend(np.array(val_ds[i][1]))
-        f1_score_val = f1_score(true_labels, 1*(preds>0.5))
-        return f1_score_val
-    except:
-        sys.exit()
-    
+    for i in range(0,int(number_of_generator_calls)):
+        # print(np.array(val_ds[i][1]).shape[0])
+        true_labels.extend(np.array(val_ds[i][1]))
+    f1_score_val = f1_score(true_labels, 1*(preds>0.5))
+    return f1_score_val
