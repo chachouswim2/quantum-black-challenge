@@ -40,6 +40,10 @@ import warnings
 
 warnings.simplefilter("ignore", UserWarning)
 
+from tensorflow.compat.v1 import ConfigProto
+from tensorflow.compat.v1 import InteractiveSession
+
+
 ## Set paths
 img_folder = os.path.join(os.getcwd(),"data","ai_ready","images")
 train_img = os.path.join(os.getcwd(),"data","ai_ready","train_images")
@@ -75,31 +79,27 @@ if __name__ == "__main__":
     print(f"the f1_socre for the val set is :{f1_score_val}")
     test_ds = test_set(test_img, config.image_size, config.batch_size)
     y_preds=test_model(test_ds, model, 1)
-<<<<<<< HEAD
+    
+
 #     number_of_examples = len(val_ds.filenames)
 #     number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size)) 
 #     # 1.0 above is to skip integer division
 
-#     true_labels = []
-=======
+    true_labels = []
+
     number_of_examples = len(test_ds.filenames)
     number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size)) 
     # 1.0 above is to skip integer division
->>>>>>> c074a54238381538d41acd4427ae8afbf08a4b0e
+
 
 #     for i in range(0,int(number_of_generator_calls)):
 #         # print(np.array(val_ds[i][1]).shape[0])
 #         true_labels.extend(np.array(val_ds[i][1]))
 #     y_test = true_labels[:len(y_preds)]
 
-<<<<<<< HEAD
+
     y_test = df_labels[df_labels['split']=="test"]['class'].values
-=======
-    for i in range(0,int(number_of_generator_calls)):
-        # print(np.array(val_ds[i][1]).shape[0])
-        true_labels.extend(np.array(test_ds[i][1]))
-    y_test = true_labels[:len(y_preds)]
->>>>>>> c074a54238381538d41acd4427ae8afbf08a4b0e
+
 
     # print(f"accuracy score for test is {accurcay_test}")
     try:
@@ -114,18 +114,15 @@ if __name__ == "__main__":
     df_preds["preds_proba"] = y_preds
     df_preds.to_csv('df_preds.csv')
     plt.title('Receiver Operating Characteristic')
-    plt.plot(fpr, tpr, 'b', label = f'AUC = {roc_auc :0.2f}')
+    plt.plot(fpr, tpr, color='#285430', label = f'AUC = {roc_auc :0.2f}')
     plt.legend(loc = 'lower right')
-    plt.plot([0, 1], [0, 1],'r--')
+    plt.plot([0, 1], [0, 1],color='#fed049',linestyle='--')
     plt.xlim([0, 1])
     plt.ylim([0, 1])
     plt.ylabel('True Positive Rate')
     plt.xlabel('False Positive Rate')
     plt.savefig('auc_curve')
     plt.show()
-<<<<<<< HEAD
-    ipdb.set_trace()
-=======
     
     output_preds(y_preds, train_ds, test_ds, 'last_keras_preds')
->>>>>>> c074a54238381538d41acd4427ae8afbf08a4b0e
+
