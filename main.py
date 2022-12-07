@@ -44,6 +44,7 @@ warnings.simplefilter("ignore", UserWarning)
 img_folder = os.path.join(os.getcwd(),"data","ai_ready","images")
 train_img = os.path.join(os.getcwd(),"data","ai_ready","train_images")
 val_img = os.path.join(os.getcwd(),"data","ai_ready","val_images")
+test_img = os.path.join(os.getcwd(),"data","ai_ready","test_images")
 labels_image = os.path.join(os.getcwd(),"data","ai_ready","x-ai_data.csv")
 create_images =False
 
@@ -68,16 +69,29 @@ if __name__ == "__main__":
     ## Train and Val dataset
     train_ds = train_set(train_img, config.image_size, config.batch_size)
     val_ds = val_set(val_img, config.image_size, config.batch_size)
-
+    # test_ds = test_set(val_img, config.image_size, config.batch_size)
     ## Train Model
-    train_model(model, train_ds, val_ds, config.number_epochs)
+    f1_score_val = train_model(model, train_ds, val_ds, config.number_epochs)
+    print(f"the f1_socre for the val set is :{f1_score_val}")
+    test_set = test_set(test_img, config.image_size, config.batch_size)
+    y_preds=test_model(test_set, model, 1)
+    number_of_examples = len(test_set.filenames)
+    number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size)) 
+    # 1.0 above is to skip integer division
 
-    y_test = np.ones(len(train_ds))
-    probs = model.predict_proba(X_test)
-    preds = probs[:,1]
-    fpr, tpr, threshold = roc_curve(y_test, preds)
-    roc_auc = roc_auc_score(fpr, tpr)
+    true_labels = []
 
+    for i in range(0,int(number_of_generator_calls)):
+        # print(np.array(val_ds[i][1]).shape[0])
+        true_labels.extend(np.array(val_ds[i][1]))
+    y_test = true_labels[:len(y_preds)]
+
+    f1_score_test = f1_score(y_test, 1*(y_preds>0.5))
+    try:
+        fpr, tpr, threshold = roc_curve(y_test, y_preds)
+        roc_auc = auc(fpr, tpr)
+    except:
+        ipdb.set_trace()
     plt.title('Receiver Operating Characteristic')
     plt.plot(fpr, tpr, 'b', label = f'AUC = {roc_auc :0.2f}')
     plt.legend(loc = 'lower right')
@@ -86,4 +100,5 @@ if __name__ == "__main__":
     plt.ylim([0, 1])
     plt.ylabel('True Positive Rate')
     plt.xlabel('False Positive Rate')
+    plt.savefig('auc_curve')
     plt.show()
