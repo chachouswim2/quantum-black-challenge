@@ -198,6 +198,9 @@ def train_model(model, train_ds, val_ds, epochs):
         verbose = 1,
         callbacks = callbacks
         )
+    
+    model.save("last_keras_model.h5")
+               
     preds = model.predict_generator(val_ds)
     number_of_examples = len(val_ds.filenames)
     number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size)) 

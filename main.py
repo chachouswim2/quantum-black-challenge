@@ -75,18 +75,31 @@ if __name__ == "__main__":
     print(f"the f1_socre for the val set is :{f1_score_val}")
     test_ds = test_set(test_img, config.image_size, config.batch_size)
     y_preds=test_model(test_ds, model, 1)
+<<<<<<< HEAD
 #     number_of_examples = len(val_ds.filenames)
 #     number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size)) 
 #     # 1.0 above is to skip integer division
 
 #     true_labels = []
+=======
+    number_of_examples = len(test_ds.filenames)
+    number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size)) 
+    # 1.0 above is to skip integer division
+>>>>>>> c074a54238381538d41acd4427ae8afbf08a4b0e
 
 #     for i in range(0,int(number_of_generator_calls)):
 #         # print(np.array(val_ds[i][1]).shape[0])
 #         true_labels.extend(np.array(val_ds[i][1]))
 #     y_test = true_labels[:len(y_preds)]
 
+<<<<<<< HEAD
     y_test = df_labels[df_labels['split']=="test"]['class'].values
+=======
+    for i in range(0,int(number_of_generator_calls)):
+        # print(np.array(val_ds[i][1]).shape[0])
+        true_labels.extend(np.array(test_ds[i][1]))
+    y_test = true_labels[:len(y_preds)]
+>>>>>>> c074a54238381538d41acd4427ae8afbf08a4b0e
 
     # print(f"accuracy score for test is {accurcay_test}")
     try:
@@ -110,4 +123,9 @@ if __name__ == "__main__":
     plt.xlabel('False Positive Rate')
     plt.savefig('auc_curve')
     plt.show()
+<<<<<<< HEAD
     ipdb.set_trace()
+=======
+    
+    output_preds(y_preds, train_ds, test_ds, 'last_keras_preds')
+>>>>>>> c074a54238381538d41acd4427ae8afbf08a4b0e
