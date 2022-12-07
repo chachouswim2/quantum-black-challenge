@@ -34,18 +34,6 @@ def myFunc(image):
     return cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
                         #COLOR_RGB2HSV)
 
-# Calling ImageDataGenerator for creating data augmentation generator.
-datagen = ImageDataGenerator(
-    rotation_range=90,
-    shear_range=0.2,
-    horizontal_flip=True,
-    vertical_flip=True,
-    # brightness_range = [0.5, 2.0],
-    zca_whitening =True,
-    # preprocessing_function = myFunc
-    # zoom_range=0.3
-)
-
 def train_set(train_path, image_size, batch_size):
     """
     Create train dataset to train the model
@@ -58,13 +46,6 @@ def train_set(train_path, image_size, batch_size):
     """
     train_datagen = ImageDataGenerator(
         rescale=1. / 255,
-        rotation_range=90,
-        # shear_range=0.2,
-        horizontal_flip=True,
-        vertical_flip=True,
-        zca_whitening =True,
-        # # brightness_range = [0.5, 2.0],
-        preprocessing_function = myFunc,
         )
 
     train_generator = train_datagen.flow_from_directory(
