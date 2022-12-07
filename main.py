@@ -62,10 +62,10 @@ if __name__ == "__main__":
     if create_images:
         subfolders(labels_image, img_folder, train_img, val_img)
 
+    df_labels = pd.read_csv(labels_image)
     ## Model
     # ipdb.set_trace()
     model = keras_model(input_shape=config.image_size + (3,))
-
     ## Train and Val dataset
     train_ds = train_set(train_img, config.image_size, config.batch_size)
     val_ds = val_set(val_img, config.image_size, config.batch_size)
@@ -73,29 +73,33 @@ if __name__ == "__main__":
     ## Train Model
     f1_score_val = train_model(model, train_ds, val_ds, config.number_epochs)
     print(f"the f1_socre for the val set is :{f1_score_val}")
-    test_ds = test_set(val_img, config.image_size, config.batch_size)
-    y_preds=test_model(val_ds, model, 1)
-    number_of_examples = len(val_ds.filenames)
-    number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size)) 
-    # 1.0 above is to skip integer division
+    test_ds = test_set(test_img, config.image_size, config.batch_size)
+    y_preds=test_model(test_ds, model, 1)
+#     number_of_examples = len(val_ds.filenames)
+#     number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size)) 
+#     # 1.0 above is to skip integer division
 
-    true_labels = []
+#     true_labels = []
 
-    for i in range(0,int(number_of_generator_calls)):
-        # print(np.array(val_ds[i][1]).shape[0])
-        true_labels.extend(np.array(val_ds[i][1]))
-    y_test = true_labels[:len(y_preds)]
+#     for i in range(0,int(number_of_generator_calls)):
+#         # print(np.array(val_ds[i][1]).shape[0])
+#         true_labels.extend(np.array(val_ds[i][1]))
+#     y_test = true_labels[:len(y_preds)]
 
+    y_test = df_labels[df_labels['split']=="test"]['class'].values
 
     # print(f"accuracy score for test is {accurcay_test}")
     try:
         f1_score_test = f1_score(y_test, 1*(y_preds>0.5))
-        # accuracy_test = accuracy_score(y_test, 1*(y_preds>0.5))
-        print(f"the f1_score test is {f1_score_test}")
+        accuracy_test = accuracy_score(y_test, 1*(y_preds>0.5))
+        print(f"the f1_score test is {f1_score_test}, the accucary is {accuracy_test}")
         fpr, tpr, threshold = roc_curve(y_test, y_preds)
         roc_auc = auc(fpr, tpr)
     except:
         ipdb.set_trace()
+    df_preds = df_labels[df_labels['split']=="test"].copy()
+    df_preds["preds_proba"] = y_preds
+    df_preds.to_csv('df_preds.csv')
     plt.title('Receiver Operating Characteristic')
     plt.plot(fpr, tpr, 'b', label = f'AUC = {roc_auc :0.2f}')
     plt.legend(loc = 'lower right')
