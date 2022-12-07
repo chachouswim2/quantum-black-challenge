@@ -21,6 +21,8 @@ import tensorflow as tf
 from tensorflow.keras.optimizers import SGD, Adam
 from tensorflow.keras import layers
 import config
+from model_test.test_model import * 
+from sklearn.metrics import roc_auc_score, roc_curve, f1_score
 
 import warnings
 
@@ -42,7 +44,8 @@ def train_set(train_path, image_size, batch_size):
         shear_range=0.2,
         horizontal_flip=True,
         vertical_flip=True,
-        # brightness_range = [0.5, 2.0])
+        # brightness_range = [0.5, 2.0]
+        )
 
     train_generator = train_datagen.flow_from_directory(
         train_path, target_size=image_size, batch_size=batch_size, class_mode="binary"
@@ -107,11 +110,11 @@ def keras_model(input_shape, train_g, val_g, batch_size, epochs, model_name):
         - keras_model : trained keras model
     """
     model = Sequential()
-    model.add(Conv2D(32, (2, 2), input_shape=(256,256,3)))
+    model.add(Conv2D(64, (2, 2), input_shape=(256,256,3)))
     model.add(LeakyReLU(0.2))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(32, (2, 2)))
+    model.add(Conv2D(64, (2, 2)))
     model.add(LeakyReLU(0.2))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
@@ -126,16 +129,38 @@ def keras_model(input_shape, train_g, val_g, batch_size, epochs, model_name):
     model.add(Dense(1))
     model.add(Activation('sigmoid'))
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(1e-3),
+    return model
+
+def train_model(model, train_ds, val_ds, epochs):
+    """
+    Train a Keras CNN Model and output accuracy
+    Input:
+        model: keras cnn_model
+        train_ds: training Keras Dataset
+        val_ds: validation Keras dataset
+        epochs: number of epochs to train the model
+    Output:
+        accuracy: accuracy measure of the classification
+    """   
+
+    callbacks = [
+    keras.callbacks.ModelCheckpoint("save_at_{epoch}.keras"),
+    keras.callbacks.EarlyStopping(monitor='val_loss',patience=3)
+    ]
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(1e-3),
         loss="binary_crossentropy",
-        metrics=["accuracy"],)
+        metrics=["accuracy"],
+        )
 
     model.fit_generator(
-        train_g,
-        steps_per_epoch=1400 // batch_size,
-        epochs=epochs,
-        validation_data=val_g,
-        validation_steps=400 // batch_size,
-    )
-
-    model.save(model_name + ".h5")
+        train_ds,
+        steps_per_epoch=1400 // config.batch_size,
+        epochs=config.number_epochs ,
+        validation_data=val_ds,
+        validation_steps=400 // config.batch_size,
+        verbose = 2
+        )
+    preds = test_model(val_ds, model, config.batch_size)
+    true_labels = (val_ds.class_indices)
+    return f1_score(true_labels, 1*(preds>0.5))

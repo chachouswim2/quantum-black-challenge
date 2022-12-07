@@ -13,6 +13,7 @@ from model_building.create_image_folders import *
 
 sys.path.append("model_building/keras_model.py")
 from model_building.cnn_model_keras import *
+from model_building.new_keras_model import *
 
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
