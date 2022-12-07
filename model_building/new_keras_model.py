@@ -58,13 +58,13 @@ def train_set(train_path, image_size, batch_size):
     """
     train_datagen = ImageDataGenerator(
         rescale=1. / 255,
-        # rotation_range=90,
-        # # shear_range=0.2,
-        # horizontal_flip=True,
-        # vertical_flip=True,
-        # zca_whitening =True,
+        rotation_range=90,
+        # shear_range=0.2,
+        horizontal_flip=True,
+        vertical_flip=True,
+        zca_whitening =True,
         # # brightness_range = [0.5, 2.0],
-        # preprocessing_function = myFunc,
+        preprocessing_function = myFunc,
         )
 
     train_generator = train_datagen.flow_from_directory(
@@ -86,7 +86,7 @@ def val_set(val_path, image_size, batch_size):
     """
     test_datagen = ImageDataGenerator(
         rescale=1.0 / 255,
-        # preprocessing_function = myFunc,
+        preprocessing_function = myFunc,
     )
 
     val_generator = test_datagen.flow_from_directory(
@@ -108,7 +108,7 @@ def test_set(test_path, image_size, batch_size):
     """
     test_datagen = ImageDataGenerator(
         rescale=1.0 / 255,
-        # preprocessing_function = myFunc,
+        preprocessing_function = myFunc,
     )
 
     test_generator = test_datagen.flow_from_directory(
@@ -151,8 +151,13 @@ def keras_model(input_shape):
     # model.add(Dropout(config.dropout))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
+    model.add(Conv2D(32, (2, 2)))
+    model.add(LeakyReLU(0.2))
+    # model.add(Dropout(config.dropout))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
     model.add(Flatten())
-    model.add(Dense(64))
+    model.add(Dense(128))
     model.add(LeakyReLU(0.2))
     model.add(Dropout(config.dropout))
     model.add(Dense(64))
