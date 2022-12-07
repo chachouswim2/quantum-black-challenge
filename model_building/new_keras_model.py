@@ -42,7 +42,7 @@ datagen = ImageDataGenerator(
     vertical_flip=True,
     # brightness_range = [0.5, 2.0],
     zca_whitening =True,
-    preprocessing_function = myFunc
+    # preprocessing_function = myFunc
     # zoom_range=0.3
 )
 
