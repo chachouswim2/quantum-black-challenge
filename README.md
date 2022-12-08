@@ -23,7 +23,9 @@ Folder containing the python file to test the model and make prediction.
 ### app
 Folder containing the file to create a web app that integrates the model and its predictions.
 
-**Instructions to create the app:**
+Webapp demo: [https://sdelgendre-webapp-foodix-home-7srx0f.streamlit.app/](https://sdelgendre-webapp-foodix-home-7srx0f.streamlit.app/)
+
+**Instructions to reproduce the environment and run the app locally:**
 
 - Create a new environment:
 
