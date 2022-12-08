@@ -9,6 +9,9 @@ __pycache__/
 # Folders
 data/ai_ready/images
 data/ai_ready/masks
+data/ai_ready/train_images
+data/ai_ready/val_images
+data/ai_ready/test_images
 
 # Distribution / packaging
 .Python
