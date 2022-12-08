@@ -49,6 +49,11 @@ def train_set(train_path, image_size, batch_size):
     """
     train_datagen = ImageDataGenerator(
         rescale=1.0 / 255,
+        horizontal_flip=True,
+        vertical_flip=True,
+        zca_whitening =True,
+        # # # brightness_range = [0.5, 2.0],
+        # preprocessing_function = myFunc,
     )
 
     train_generator = train_datagen.flow_from_directory(
@@ -70,7 +75,7 @@ def val_set(val_path, image_size, batch_size):
     """
     test_datagen = ImageDataGenerator(
         rescale=1.0 / 255,
-        preprocessing_function=myFunc,
+        # preprocessing_function=myFunc,
     )
 
     val_generator = test_datagen.flow_from_directory(
@@ -92,7 +97,7 @@ def test_set(test_path, image_size, batch_size):
     """
     test_datagen = ImageDataGenerator(
         rescale=1.0 / 255,
-        preprocessing_function=myFunc,
+        # preprocessing_function=myFunc,
     )
 
     test_generator = test_datagen.flow_from_directory(
@@ -120,25 +125,25 @@ def keras_model(input_shape):
         - keras_model : trained keras model
     """
     model = Sequential()
-    model.add(Conv2D(64, (2, 2), input_shape=input_shape))
-    model.add(LeakyReLU(0.2))
+    model.add(Conv2D(32, (3, 3), input_shape=input_shape))
+    model.add(LeakyReLU(0.1))
     # model.add(Dropout(config.dropout))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(64, (2, 2)))
-    model.add(LeakyReLU(0.2))
+    model.add(Conv2D(64, (3, 3)))
+    model.add(LeakyReLU(0.1))
     # model.add(Dropout(config.dropout))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(32, (2, 2)))
-    model.add(LeakyReLU(0.2))
+    model.add(Conv2D(128, (3, 3)))
+    model.add(LeakyReLU(0.1))
     # model.add(Dropout(config.dropout))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(32, (2, 2)))
+    model.add(Conv2D(256, (3, 3)))
     model.add(LeakyReLU(0.2))
     # model.add(Dropout(config.dropout))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())
     model.add(Dense(128))
@@ -174,6 +179,7 @@ def train_model(model, train_ds, val_ds, epochs):
         loss="binary_crossentropy",
         metrics=["accuracy"],
     )
+    print("starting training of the model")
 
     model.fit_generator(
         train_ds,
