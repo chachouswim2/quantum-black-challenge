@@ -32,7 +32,7 @@ from keras.utils.np_utils import to_categorical
 from keras.models import Model
 from keras.models import Sequential
 from keras.callbacks import EarlyStopping
-from sklearn.metrics import roc_curve,auc, roc_auc_score,accuracy_score
+from sklearn.metrics import roc_curve, auc, roc_auc_score, accuracy_score
 import matplotlib.pyplot as plt
 
 from tensorflow.keras import layers
@@ -45,12 +45,12 @@ from tensorflow.compat.v1 import InteractiveSession
 
 
 ## Set paths
-img_folder = os.path.join(os.getcwd(),"data","ai_ready","images")
-train_img = os.path.join(os.getcwd(),"data","ai_ready","train_images")
-val_img = os.path.join(os.getcwd(),"data","ai_ready","val_images")
-test_img = os.path.join(os.getcwd(),"data","ai_ready","test_images")
-labels_image = os.path.join(os.getcwd(),"data","ai_ready","x-ai_data.csv")
-create_images =False
+img_folder = os.path.join(os.getcwd(), "data", "ai_ready", "images")
+train_img = os.path.join(os.getcwd(), "data", "ai_ready", "train_images")
+val_img = os.path.join(os.getcwd(), "data", "ai_ready", "val_images")
+test_img = os.path.join(os.getcwd(), "data", "ai_ready", "test_images")
+labels_image = os.path.join(os.getcwd(), "data", "ai_ready", "x-ai_data.csv")
+create_images = False
 
 plot_auc = False
 
@@ -78,51 +78,48 @@ if __name__ == "__main__":
     f1_score_val = train_model(model, train_ds, val_ds, config.number_epochs)
     print(f"the f1_socre for the val set is :{f1_score_val}")
     test_ds = test_set(test_img, config.image_size, config.batch_size)
-    y_preds=test_model(test_ds, model, 1)
-    
+    y_preds = test_model(test_ds, model, 1)
 
-#     number_of_examples = len(val_ds.filenames)
-#     number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size)) 
-#     # 1.0 above is to skip integer division
+    #     number_of_examples = len(val_ds.filenames)
+    #     number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size))
+    #     # 1.0 above is to skip integer division
 
     true_labels = []
 
     number_of_examples = len(test_ds.filenames)
-    number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size)) 
+    number_of_generator_calls = math.ceil(
+        number_of_examples / (1.0 * config.batch_size)
+    )
     # 1.0 above is to skip integer division
 
+    #     for i in range(0,int(number_of_generator_calls)):
+    #         # print(np.array(val_ds[i][1]).shape[0])
+    #         true_labels.extend(np.array(val_ds[i][1]))
+    #     y_test = true_labels[:len(y_preds)]
 
-#     for i in range(0,int(number_of_generator_calls)):
-#         # print(np.array(val_ds[i][1]).shape[0])
-#         true_labels.extend(np.array(val_ds[i][1]))
-#     y_test = true_labels[:len(y_preds)]
-
-
-    y_test = df_labels[df_labels['split']=="test"]['class'].values
-
+    y_test = df_labels[df_labels["split"] == "test"]["class"].values
 
     # print(f"accuracy score for test is {accurcay_test}")
     try:
-        f1_score_test = f1_score(y_test, 1*(y_preds>0.5))
-        accuracy_test = accuracy_score(y_test, 1*(y_preds>0.5))
+        f1_score_test = f1_score(y_test, 1 * (y_preds > 0.5))
+        accuracy_test = accuracy_score(y_test, 1 * (y_preds > 0.5))
         print(f"the f1_score test is {f1_score_test}, the accucary is {accuracy_test}")
         fpr, tpr, threshold = roc_curve(y_test, y_preds)
         roc_auc = auc(fpr, tpr)
     except:
         ipdb.set_trace()
-    df_preds = df_labels[df_labels['split']=="test"].copy()
+    df_preds = df_labels[df_labels["split"] == "test"].copy()
     df_preds["preds_proba"] = y_preds
-    df_preds.to_csv('class_predicted.csv', index=False)
-    plt.title('Receiver Operating Characteristic')
-    plt.plot(fpr, tpr, color='#285430', label = f'AUC = {roc_auc :0.2f}')
-    plt.legend(loc = 'lower right')
-    plt.plot([0, 1], [0, 1],color='#fed049',linestyle='--')
+    df_preds.to_csv("class_predicted.csv", index=False)
+    plt.title("Receiver Operating Characteristic")
+    plt.plot(fpr, tpr, color="#285430", label=f"AUC = {roc_auc :0.2f}")
+    plt.legend(loc="lower right")
+    plt.plot([0, 1], [0, 1], color="#fed049", linestyle="--")
     plt.xlim([0, 1])
     plt.ylim([0, 1])
-    plt.ylabel('True Positive Rate')
-    plt.xlabel('False Positive Rate')
-    plt.savefig('auc_curve')
+    plt.ylabel("True Positive Rate")
+    plt.xlabel("False Positive Rate")
+    plt.savefig("auc_curve")
     plt.show()
-    
-    output_preds(y_preds, train_ds, test_ds, 'class predicted2')
 
+    output_preds(y_preds, train_ds, test_ds, "class predicted2")

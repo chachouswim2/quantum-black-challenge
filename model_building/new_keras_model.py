@@ -21,18 +21,21 @@ import tensorflow as tf
 from tensorflow.keras.optimizers import SGD, Adam
 from tensorflow.keras import layers
 import config
-from model_test.test_model import * 
+from model_test.test_model import *
 from sklearn.metrics import roc_auc_score, roc_curve, f1_score
 
 import warnings
 import ipdb
 import math
 import cv2
+
 warnings.simplefilter("ignore", UserWarning)
 
+
 def myFunc(image):
-    return cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
-                        #COLOR_RGB2HSV)
+    return cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    # COLOR_RGB2HSV)
+
 
 def train_set(train_path, image_size, batch_size):
     """
@@ -45,13 +48,13 @@ def train_set(train_path, image_size, batch_size):
         train_generator: train set in Keras format
     """
     train_datagen = ImageDataGenerator(
-        rescale=1. / 255,
-        )
+        rescale=1.0 / 255,
+    )
 
     train_generator = train_datagen.flow_from_directory(
         train_path, target_size=image_size, batch_size=batch_size, class_mode="binary"
     )
-    print('train set generator created, test')
+    print("train set generator created, test")
     return train_generator
 
 
@@ -67,7 +70,7 @@ def val_set(val_path, image_size, batch_size):
     """
     test_datagen = ImageDataGenerator(
         rescale=1.0 / 255,
-        preprocessing_function = myFunc,
+        preprocessing_function=myFunc,
     )
 
     val_generator = test_datagen.flow_from_directory(
@@ -89,7 +92,7 @@ def test_set(test_path, image_size, batch_size):
     """
     test_datagen = ImageDataGenerator(
         rescale=1.0 / 255,
-        preprocessing_function = myFunc,
+        preprocessing_function=myFunc,
     )
 
     test_generator = test_datagen.flow_from_directory(
@@ -145,9 +148,11 @@ def keras_model(input_shape):
     model.add(LeakyReLU(0.2))
     model.add(Dropout(config.dropout))
     model.add(Dense(1))
-    model.add(Activation('sigmoid'))
+    model.add(Activation("sigmoid"))
 
     return model
+
+
 def train_model(model, train_ds, val_ds, epochs):
     """
     Train a Keras CNN Model and output accuracy
@@ -158,39 +163,41 @@ def train_model(model, train_ds, val_ds, epochs):
         epochs: number of epochs to train the model
     Output:
         accuracy: accuracy measure of the classification
-    """   
+    """
 
     callbacks = [
-    keras.callbacks.ModelCheckpoint("save_at_{epoch}.keras"),
-    keras.callbacks.EarlyStopping(monitor='val_loss',patience=5)
+        keras.callbacks.ModelCheckpoint("save_at_{epoch}.keras"),
+        keras.callbacks.EarlyStopping(monitor="val_loss", patience=5),
     ]
     model.compile(
         optimizer=tf.keras.optimizers.Adam(config.learning_rate),
         loss="binary_crossentropy",
         metrics=["accuracy"],
-        )
+    )
 
     model.fit_generator(
         train_ds,
         steps_per_epoch=1400 // config.batch_size,
-        epochs=config.number_epochs ,
+        epochs=config.number_epochs,
         validation_data=val_ds,
         validation_steps=400 // config.batch_size,
-        verbose = 1,
-        callbacks = callbacks
-        )
-    
+        verbose=1,
+        callbacks=callbacks,
+    )
+
     model.save("model_with_test.h5")
-               
+
     preds = model.predict_generator(val_ds)
     number_of_examples = len(val_ds.filenames)
-    number_of_generator_calls = math.ceil(number_of_examples / (1.0 * config.batch_size)) 
+    number_of_generator_calls = math.ceil(
+        number_of_examples / (1.0 * config.batch_size)
+    )
     # 1.0 above is to skip integer division
 
     true_labels = []
 
-    for i in range(0,int(number_of_generator_calls)):
+    for i in range(0, int(number_of_generator_calls)):
         # print(np.array(val_ds[i][1]).shape[0])
         true_labels.extend(np.array(val_ds[i][1]))
-    f1_score_val = f1_score(true_labels, 1*(preds>0.5))
+    f1_score_val = f1_score(true_labels, 1 * (preds > 0.5))
     return f1_score_val
